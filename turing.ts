@@ -1,5 +1,3 @@
-//* (initial_state, rgxp | string, new_state, buffer_new_value, pointer_movement)
-
 class InvalidInputState extends Error {
     constructor() {
         super('Wrong argoument number for State')
@@ -14,11 +12,11 @@ class AmbigousState extends Error {
 enum Movement{
     Left = '<',
     Right = '>',
-    Stay = '-',
+    Stay = '_',
 }
 
 enum SpecialChar{
-    Empty = '-',
+    Empty = '_',
     AnyNotEmpty = '**',
 }
 
@@ -30,7 +28,7 @@ class State {
     pointer_movement: Movement
 
     constructor(s:string) {
-        let tmp = s.trim().replace(/\s/g,'').split(',');
+        let tmp = s.trim().replace(/\s/g,'').replace('(', '').replace(')', '').split(',');
         try {
             this.current_status = tmp[0];
             this.buffer_read = tmp[1];
@@ -157,21 +155,21 @@ class TuringMachine {
 
 
 let s = [
-    new State('0, **, Mov, -, >'),
-    new State('Mov, **, Mov, -, >'),
-    new State('Mov, -, Inc, -, <'),
-    new State('Inc, 0, End, 1, -'),
-    new State('Inc, 1, End, 2, -'),
-    new State('Inc, 2, End, 3, -'),
-    new State('Inc, 3, End, 4, -'),
-    new State('Inc, 4, End, 5, -'),
-    new State('Inc, 5, End, 6, -'),
-    new State('Inc, 6, End, 7, -'),
-    new State('Inc, 7, End, 8, -'),
-    new State('Inc, 8, End, 9, -'),
-    new State('Inc, 9, Inc, 0, <'),
-    new State('Inc, -, End, 1, -'),
+    new State('(0, **, Mov, _, >)'),
+    new State('(Mov, **, Mov, _, >)'),
+    new State('(Mov, _, Inc, _, <)'),
+    new State('(Inc, 0, End, 1, _)'),
+    new State('(Inc, 1, End, 2, _)'),
+    new State('(Inc, 2, End, 3, _)'),
+    new State('(Inc, 3, End, 4, _)'),
+    new State('(Inc, 4, End, 5, _)'),
+    new State('(Inc, 5, End, 6, _)'),
+    new State('(Inc, 6, End, 7, _)'),
+    new State('(Inc, 7, End, 8, _)'),
+    new State('(Inc, 8, End, 9, _)'),
+    new State('(Inc, 9, Inc, 0, <)'),
+    new State('(Inc, _, End, 1, _)'),
 ];
 
-let t = new TuringMachine(s, '999999999999', 250);
+let t = new TuringMachine(s, '12345999', 250);
 t.exec();
