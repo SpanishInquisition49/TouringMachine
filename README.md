@@ -1,5 +1,5 @@
 # Touring Machine
-Un semplice inteprete di una macchina di Touring.
+Un semplice inteprete di una macchina di Turing.
 
 # Funzionamento:
 L' interprete prende come argomento 3 parametri: 
