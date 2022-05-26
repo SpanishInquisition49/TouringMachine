@@ -1,16 +1,19 @@
 # Touring Machine
+
 Un semplice inteprete di una macchina di Touring.
 
-# Funzionamento:
-L' interprete prende come argomento 3 parametri: 
-* la lista degli stati: contente tutti gli stati che può assumere la macchina. 
+## Funzionamento
+
+L' interprete prende come argomento 3 parametri:
+
+* la lista degli stati: contente tutti gli stati che può assumere la macchina.
 * il buffer allo stato 0.
 * la velocità (ms).
 
 Per convenzione la macchina parte sempre dallo stato 0 e con la testina in posizione 0.
 La macchina si ferma quando non può cambiare stato e come output stampa la combinazione di stato corrente, buffer e posizione testina.
 
-# Formattazione Stati:
+## Formattazione Stati
 
 Uno stato è una tupla (stato iniziale, lettura buffer, nuovo stato, scrittura buffer, movimento testina):
 
@@ -27,6 +30,6 @@ Uno stato è una tupla (stato iniziale, lettura buffer, nuovo stato, scrittura b
   * Destra '>'
   * Non scorrere '_'
 
-## Esempio
+### Esempio
 
 (0, A, 1, B, >) si traduce come: Se sei nello stato 0 e stai leggendo A allora vai nello stato 1 e scrivi B poi muovi la testina a destra

@@ -1,3 +1,11 @@
+import * as fs from 'fs';
+import * as readline from 'node:readline';
+import { stdin, stdout } from 'process';
+
+const rl = readline.createInterface({
+    input: stdin,
+    output: stdout
+});
 class InvalidInputState extends Error {
     constructor() {
         super('Wrong argoument number for State')
@@ -6,6 +14,12 @@ class InvalidInputState extends Error {
 class AmbigousState extends Error {
     constructor() {
         super('Too many with the same special character')
+    }
+}
+
+class FileNotFound extends Error {
+    constructor() {
+        super('The file was not found')
     }
 }
 
@@ -18,6 +32,7 @@ enum Movement{
 enum SpecialChar{
     Empty = '_',
     AnyNotEmpty = '**',
+    Space = '__',
 }
 
 class State {
@@ -39,6 +54,17 @@ class State {
         catch {
             throw new InvalidInputState();
         }
+    }
+
+    static ReadProgramFromFile = (fileName:string): State[] => {
+        if(!fs.existsSync(fileName))
+            throw new FileNotFound()
+        
+        const buffer = fs.readFileSync(fileName, 'utf-8')
+        let states = buffer.split('\n');
+        let res: State[] = [];
+        states.map((s) => {res.push(new State(s))});
+        return res;
     }
 
     CompareWithBuffer = (bufferChar: string): boolean => {
@@ -153,23 +179,13 @@ class TuringMachine {
     }
 }
 
-
-let s = [
-    new State('(0, **, Mov, _, >)'),
-    new State('(Mov, **, Mov, _, >)'),
-    new State('(Mov, _, Inc, _, <)'),
-    new State('(Inc, 0, End, 1, _)'),
-    new State('(Inc, 1, End, 2, _)'),
-    new State('(Inc, 2, End, 3, _)'),
-    new State('(Inc, 3, End, 4, _)'),
-    new State('(Inc, 4, End, 5, _)'),
-    new State('(Inc, 5, End, 6, _)'),
-    new State('(Inc, 6, End, 7, _)'),
-    new State('(Inc, 7, End, 8, _)'),
-    new State('(Inc, 8, End, 9, _)'),
-    new State('(Inc, 9, Inc, 0, <)'),
-    new State('(Inc, _, End, 1, _)'),
-];
-
-let t = new TuringMachine(s, '12345999', 250);
-t.exec();
+console.clear()
+rl.question('Input the program file: ', (input: string) => {
+    const programFile = input
+    rl.question('Input the initial content of the tape: ', (input: string) => {
+        const tapeContent = input
+        let t = new TuringMachine(State.ReadProgramFromFile(programFile), tapeContent, 250);
+        t.exec();
+        rl.close();
+    })
+})
