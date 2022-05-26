@@ -1,6 +1,5 @@
 # Touring Machine
-
-Un semplice inteprete di una macchina di Touring.
+Un semplice inteprete di una macchina di Turing.
 
 ## Funzionamento
 
