@@ -17,6 +17,12 @@ class AmbigousState extends Error {
     }
 }
 
+class SyntaxError extends Error {
+    constructor(message: string){ 
+        super(message);
+    }
+}
+
 class FileNotFound extends Error {
     constructor() {
         super('The file was not found')
@@ -61,7 +67,7 @@ class State {
             throw new FileNotFound()
         
         const buffer = fs.readFileSync(fileName, 'utf-8')
-        let states = buffer.split('\n');
+        let states = buffer.split('\n').filter((s) => s[0] !== '#');
         let res: State[] = [];
         states.map((s) => {res.push(new State(s))});
         return res;
@@ -71,16 +77,31 @@ class State {
         let res: boolean;
         switch(this.buffer_read){
             case SpecialChar.Empty:
-                res = (bufferChar == '' || bufferChar == undefined)
+                res = (bufferChar === '' || bufferChar === undefined)
                 break;
             case SpecialChar.AnyNotEmpty:
-                res = !(bufferChar == '' || bufferChar == undefined)
+                res = !(bufferChar === '' || bufferChar === undefined)
                 break;
+            case SpecialChar.Space:
+                res = bufferChar === ' ' 
             default:
                 res = this.buffer_read == bufferChar
                 break;
         }
         return res
+    }
+
+    GetCharacterToWrite = (currentChar: string): string => {
+        switch(this.buffer_write){
+            case SpecialChar.Empty:
+                return currentChar
+            case SpecialChar.Space:
+                return ' '
+            case SpecialChar.AnyNotEmpty:
+                throw new SyntaxError('The Special character AnyNotEmpty is not a writable character')
+            default:
+                return this.buffer_write
+        }
     }
 }
 
@@ -149,7 +170,7 @@ class TuringMachine {
     private act = (states: State[]): boolean => {
         for(let state of states){
             if(state.CompareWithBuffer(this.bufferAtPointer())){
-                this.buffer[this.pointer_position] = state.buffer_write == SpecialChar.Empty ? this.bufferAtPointer() : state.buffer_write;
+                this.buffer[this.pointer_position] = state.GetCharacterToWrite(this.bufferAtPointer())
                 this.current_state = state.new_state;
                 this.movePointer(state.pointer_movement);
                 return true
