@@ -1,47 +1,26 @@
 import * as fs from 'fs';
 import * as readline from 'node:readline';
 import { stdin, stdout } from 'process';
+import { AmbiguousState, FileNotFound, InvalidInputState } from './src/errors';
 
 const rl = readline.createInterface({
     input: stdin,
     output: stdout
 });
-class InvalidInputState extends Error {
-    constructor() {
-        super('Wrong argoument number for State')
-    }
-}
-class AmbigousState extends Error {
-    constructor() {
-        super('Too many with the same special character')
-    }
-}
 
-class SyntaxError extends Error {
-    constructor(message: string){ 
-        super(message);
-    }
-}
-
-class FileNotFound extends Error {
-    constructor() {
-        super('The file was not found')
-    }
-}
-
-enum Movement{
+export enum Movement{
     Left = '<',
     Right = '>',
     Stay = '_',
 }
 
-enum SpecialChar{
+export enum SpecialChar{
     Empty = '_',
     AnyNotEmpty = '**',
     Space = '__',
 }
 
-class State {
+export class State {
     current_status: string;
     buffer_read: string;
     new_state: string;
@@ -73,7 +52,7 @@ class State {
         return res;
     }
 
-    CompareWithBuffer = (bufferChar: string): boolean => {
+    CompareWithBuffer = (bufferChar: string | undefined): boolean => {
         let res: boolean;
         switch(this.buffer_read){
             case SpecialChar.Empty:
@@ -91,10 +70,10 @@ class State {
         return res
     }
 
-    GetCharacterToWrite = (currentChar: string): string => {
+    GetCharacterToWrite = (currentChar: string | undefined): string => {
         switch(this.buffer_write){
             case SpecialChar.Empty:
-                return currentChar
+                return currentChar || ''
             case SpecialChar.Space:
                 return ' '
             case SpecialChar.AnyNotEmpty:
@@ -105,7 +84,7 @@ class State {
     }
 }
 
-class TuringMachine {
+export class TuringMachine {
     states: State[];
     buffer: string[];
     buffer_pointer_min_value: number
@@ -113,9 +92,9 @@ class TuringMachine {
     current_state: string;
     speed: number
 
-    constructor(states:State[], b:string, speed:number) {
+    constructor(states:State[], tape:string, speed:number) {
         this.states = states;
-        this.buffer = b.split('');
+        this.buffer = tape.split('');
         this.pointer_position = 0;
         this.buffer_pointer_min_value = 0;
         this.current_state = '0';
@@ -140,7 +119,6 @@ class TuringMachine {
         console.log(`Buffer: ${this.getBufferString()}`);
         console.log(`Pointer Position: ${this.pointer_position}`);
     }
-
     private getAvailableTransition = (): State[] => {
         let transition = this.states.filter((el) => el.current_status == this.current_state);
         return transition.length > 1 ? transition : transition.sort((x: State, y: State) => {
@@ -148,10 +126,9 @@ class TuringMachine {
                 return 1
             else if(x.buffer_read != SpecialChar.AnyNotEmpty && y.buffer_read == SpecialChar.AnyNotEmpty)
                 return -1
-            else throw new AmbigousState();
+            else throw new AmbiguousState();
         })
     }
-
     private movePointer = (m: Movement): void => {
         switch(m){
             case Movement.Left:
@@ -166,7 +143,6 @@ class TuringMachine {
         }
         this.buffer_pointer_min_value = Math.min(this.buffer_pointer_min_value, this.pointer_position);
     }
-
     private act = (states: State[]): boolean => {
         for(let state of states){
             if(state.CompareWithBuffer(this.bufferAtPointer())){
@@ -178,7 +154,6 @@ class TuringMachine {
         }
         return false
     }
-
     private sleep = (milliseconds: number): void => {
         const date = Date.now();
         let currentDate: number | null = null;
@@ -186,7 +161,6 @@ class TuringMachine {
             currentDate = Date.now();
         } while (currentDate - date < milliseconds);
     }
-
     exec = (): void => {
         let possibleTransition = this.getAvailableTransition()
         let actDone = true
@@ -197,6 +171,20 @@ class TuringMachine {
             this.sleep(this.speed);
         }
         this.printStatus()
+    }
+    reset = (): void => {
+        this.states = [];
+        this.buffer = [''];
+        this.pointer_position = 0;
+        this.buffer_pointer_min_value = 0;
+        this.current_state = '0';
+        this.speed = 1000;
+    }
+    set = (states:State[], tape:string, speed:number): void => {
+        this.reset()
+        this.states = states;
+        this.buffer = tape.split('');
+        this.speed = speed;
     }
 }
 
