@@ -45,7 +45,7 @@ A state is a 5-tuple of the form `(CS, TR, NS, TW, PM)`:
 
 `(0, A, 1, B, >)` is equal to: if you are in the state `0` and you are reading `A` then go in the state `1`, write `B` and move the pointer to the right.
 
-## Special Characters
+## Special Characters ✨
 
 This table contain all the special character usable in the `TR` and `TW`
 
@@ -55,3 +55,39 @@ This table contain all the special character usable in the `TR` and `TW`
 | `_` | Empty | Empty character | :white_check_mark: | :white_check_mark: |
 | `__` | Space | Space character | :white_check_mark: | :white_check_mark: |
 | `#` | Comment | if it's the first character in the entire line then the line will be ignored. | :white_check_mark: | :white_check_mark: |
+|`[-]`| Pattern | A shorthand for multiple states| :white_check_mark: | :white_check_mark: / :x:<sup>1</sup> |
+
+1: Writable only if there is a pattern in `TR`
+
+## Patterns 🚀
+
+Patterns are shorthands to multiple state writing. <br>
+
+### Examples
+
+Insted of:
+
+```Text
+(0, A, 1, B, >)
+(0, B, 1, C, >)
+(0, C, 1, D, >)
+```
+
+You can write:
+
+```Text
+(0, [A-C], 1, [B-D], >)
+```
+
+Insted of:
+
+```Text
+(0, A, 1, B, >)
+(0, B, 1, B, >)
+```
+
+you can write:
+
+```Text
+(0, [A-B], 1, B, >)
+```

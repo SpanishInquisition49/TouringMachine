@@ -1,0 +1,11 @@
+# Scorro tutto il numero
+(0, **, Mov, _, >)
+(Mov, **, Mov, _, >)
+# Quando trovo il carattere vuoto ho finito di scorrere, inizio ad incrementare
+(Mov, _, Inc, _, <)
+# Per qualsiasi cifra diversa da 9 semplicemente sostituisco il nastro con il successivo
+(Inc, [0-8], End, [1-9], _)
+# Se leggo un 9 setto a il nastro a 0 e scorro indietro continuando ad incrementare
+(Inc, 9, Inc, 0, <)
+# Se leggo il carattere vuoto e sto incrementando lo sostituisco con 1 e ho finito
+(Inc, _, End, 1, _)

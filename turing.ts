@@ -1,89 +1,13 @@
-import * as fs from 'fs';
 import * as readline from 'node:readline';
 import { stdin, stdout } from 'process';
 import { AmbiguousState, FileNotFound, InvalidInputState } from './src/errors';
+import { StatePattern } from './src/statePattern'
+import { Movement, SpecialChar, State } from './src/state'
 
 const rl = readline.createInterface({
     input: stdin,
     output: stdout
 });
-
-export enum Movement{
-    Left = '<',
-    Right = '>',
-    Stay = '_',
-}
-
-export enum SpecialChar{
-    Empty = '_',
-    AnyNotEmpty = '**',
-    Space = '__',
-}
-
-export class State {
-    current_status: string;
-    buffer_read: string;
-    new_state: string;
-    buffer_write: string;
-    pointer_movement: Movement
-
-    constructor(s:string) {
-        let tmp = s.trim().replace(/\s/g,'').replace('(', '').replace(')', '').split(',');
-        try {
-            this.current_status = tmp[0];
-            this.buffer_read = tmp[1];
-            this.new_state = tmp[2];
-            this.buffer_write = tmp[3];
-            this.pointer_movement = tmp[4] as Movement;
-        }
-        catch {
-            throw new InvalidInputState();
-        }
-    }
-
-    static ReadProgramFromFile = (fileName:string): State[] => {
-        if(!fs.existsSync(fileName))
-            throw new FileNotFound()
-        
-        const buffer = fs.readFileSync(fileName, 'utf-8')
-        let states = buffer.split('\n').filter((s) => s[0] !== '#');
-        let res: State[] = [];
-        states.map((s) => {res.push(new State(s))});
-        return res;
-    }
-
-    CompareWithBuffer = (bufferChar: string | undefined): boolean => {
-        let res: boolean;
-        switch(this.buffer_read){
-            case SpecialChar.Empty:
-                res = (bufferChar === '' || bufferChar === undefined)
-                break;
-            case SpecialChar.AnyNotEmpty:
-                res = !(bufferChar === '' || bufferChar === undefined)
-                break;
-            case SpecialChar.Space:
-                res = bufferChar === ' ' 
-            default:
-                res = this.buffer_read == bufferChar
-                break;
-        }
-        return res
-    }
-
-    GetCharacterToWrite = (currentChar: string | undefined): string => {
-        switch(this.buffer_write){
-            case SpecialChar.Empty:
-                return currentChar || ''
-            case SpecialChar.Space:
-                return ' '
-            case SpecialChar.AnyNotEmpty:
-                throw new SyntaxError('The Special character AnyNotEmpty is not a writable character')
-            default:
-                return this.buffer_write
-        }
-    }
-}
-
 export class TuringMachine {
     states: State[];
     buffer: string[];
